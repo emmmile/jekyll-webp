@@ -15,7 +15,7 @@ module Jekyll
         # We need to locate the Gems bin path as we're currently running inside the
         # jekyll site working directory
         # http://stackoverflow.com/a/10083594/779521
-        gem_spec = Gem::Specification.find_by_name("jekyll-webp")
+        gem_spec = Gem::Specification.find_by_name("jekyll-webp-resize")
         gem_root = gem_spec.gem_dir
 
         # Construct the full path to the executable

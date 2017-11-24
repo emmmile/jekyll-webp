@@ -2,22 +2,17 @@ require 'open3'
 
 module Jekyll
   module Webp
-
     class WebpExec
-
-      #
       # Runs the WebP executable for the given input parameters
       # the function detects the OS platform and architecture automatically
-      #
       def self.run(flags, input_file, output_file)
-
         # What is the path to the execs inside the gem? perhaps just bin/?
         bin_path = "bin/"
 
         # What is the OS and architecture specific executable name?
         exe_name = WebpExec.exe_name
 
-        # We need to locate the Gems bin path as we're currently running inside the 
+        # We need to locate the Gems bin path as we're currently running inside the
         # jekyll site working directory
         # http://stackoverflow.com/a/10083594/779521
         gem_spec = Gem::Specification.find_by_name("jekyll-webp")
@@ -26,9 +21,10 @@ module Jekyll
         # Construct the full path to the executable
         full_path = File.join(gem_root, bin_path, exe_name)
 
+        Jekyll.logger.info("Webp:", "Converting #{input_file}")
         # Construct the full program call
         cmd = "\"#{full_path}\" -quiet -mt #{flags} \"#{input_file}\" -o \"#{output_file}\""
-        
+
         # Execute the command
         exit_code = 0
         error = ""
@@ -48,9 +44,7 @@ module Jekyll
         return [output, error]
       end #function run
 
-      #
       # Returns the correct executable name depending on the OS platform and OS architecture
-      #
       def self.exe_name
         if OS.mac?
           return "osx-cwebp"
@@ -70,9 +64,7 @@ module Jekyll
           raise ArgumentError.new("OS platform could not be identified (gem can only be run on linux,osx or windows)")
         end
       end #function exe_name
-
     end #class WebpExec
-    
   end #module Webp
 
   module OS

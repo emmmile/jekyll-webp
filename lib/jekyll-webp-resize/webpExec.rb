@@ -1,11 +1,14 @@
 require 'open3'
+require 'fastimage'
 
 module Jekyll
   module Webp
     class WebpExec
       # Runs the WebP executable for the given input parameters
       # the function detects the OS platform and architecture automatically
-      def self.run(flags, input_file, output_file)
+      def self.run(input_file, output_file, flags, size)
+        width, height = FastImage.size(input_file)
+
         # What is the path to the execs inside the gem? perhaps just bin/?
         bin_path = "bin/"
 
@@ -21,9 +24,17 @@ module Jekyll
         # Construct the full path to the executable
         full_path = File.join(gem_root, bin_path, exe_name)
 
-        Jekyll.logger.info("Webp:", "Converting #{input_file}")
+        Jekyll.logger.info("Webp:", "Generating #{output_file}")
         # Construct the full program call
-        cmd = "\"#{full_path}\" -quiet -mt #{flags} \"#{input_file}\" -o \"#{output_file}\""
+        cmd = "\"#{full_path}\" -quiet -mt #{flags} \"#{input_file}\" "
+        if size != 0
+          if width > height
+            cmd += "-resize #{size.to_s} 0 "
+          else
+            cmd += "-resize 0 #{size.to_s} "
+          end
+        end
+        cmd += "-o \"#{output_file}\""
 
         # Execute the command
         exit_code = 0

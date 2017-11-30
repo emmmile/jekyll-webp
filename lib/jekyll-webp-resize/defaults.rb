@@ -19,6 +19,7 @@ module Jekyll
       # List of directories containing images to optimize, Nested directories will not be checked
       'img_dir'   => ["/img"],
 
+      'resize'    => [1024, 512, 256],
       # add ".gif" to the format list to generate webp for animated gifs as well
       'formats'   => [".jpeg", ".jpg", ".png", ".tiff"],
 

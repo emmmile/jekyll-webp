@@ -18,6 +18,24 @@ module Jekyll
       # This generator should be passive with regard to its execution
       priority :lowest
 
+      # Return a map {size -> filename}
+      def compute_file_resizes(output_file, resize=@config['resize'])
+        output = {0 => output_file}
+        if resize.length == 0
+          return output
+        end
+
+        for resize_entry in resize
+          dirname = File.dirname(output_file)
+          extension = File.extname(output_file)
+          basename = File.basename(output_file, extension)
+          new_output_file = dirname + "/" + basename + "-" + resize_entry.to_s + extension
+          output[resize_entry] = new_output_file
+        end
+
+        return output
+      end
+
       def generate(site)
         # Retrieve and merge the configuration from the site yml file
         @config = DEFAULT.merge(site.config['webp'] || {})
@@ -54,25 +72,27 @@ module Jekyll
             FileUtils::mkdir_p(destination_directory + prefix)
             output_full_path = File.join(destination_directory + prefix, filename)
 
-            # Keep the webp file from being cleaned by Jekyll
-            site.static_files << WebpFile.new(site,
-                                              site.dest,
-                                              File.join(imgdir, prefix),
-                                              filename)
+            compute_file_resizes(output_full_path).each do |size, output|
+              # Check if the file already has a webp alternative?
+              # If we're force rebuilding all webp files then ignore the check
+              # also check the modified time on the files to ensure that the webp file
+              # is newer than the source file, if not then regenerate
+              if !File.file?(output) ||
+                 (File.mtime(output) <= File.mtime(file))
+                # Jekyll.logger.info("WebP:", "Change to image file #{file} detected, regenerating WebP")
 
-            # Check if the file already has a webp alternative?
-            # If we're force rebuilding all webp files then ignore the check
-            # also check the modified time on the files to ensure that the webp file
-            # is newer than the source file, if not then regenerate
-            next if File.file?(output_full_path) && File.mtime(output_full_path) > File.mtime(file)
-
-            if File.file?(output_full_path) && File.mtime(output_full_path) <= File.mtime(file)
-              Jekyll.logger.info("WebP:", "Change to source image file #{file} detected, regenerating WebP")
+                # Generate the file
+                WebpExec.run(file, output, @config['flags'], size)
+                files_generated += 1
+              end
+              if File.file?(output)
+                # Keep the webp file from being cleaned by Jekyll
+                site.static_files << WebpFile.new(site,
+                                                  site.dest,
+                                                  File.join(imgdir, prefix),
+                                                  File.basename(output))
+              end
             end
-
-            # Generate the file
-            WebpExec.run(@config['flags'], file, output_full_path)
-            files_generated += 1
           end # dir.foreach
         end # img_dir
 

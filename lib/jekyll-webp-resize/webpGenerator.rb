@@ -91,6 +91,10 @@ module Jekyll
                                                   site.dest,
                                                   File.join(imgdir, prefix),
                                                   File.basename(output))
+                site.static_files << WebpFile.new(site,
+                                                  site.dest,
+                                                  File.join(imgdir, prefix),
+                                                  File.basename(output).sub("webp", "jpg"))
               end
             end
           end # dir.foreach

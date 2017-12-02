@@ -4,6 +4,26 @@ require 'fastimage'
 module Jekyll
   module Webp
     class WebpExec
+      def self.run_cmd(cmd)
+        # Execute the command
+        exit_code = 0
+        error = ""
+        output = ""
+        Open3.popen3(cmd) do |stdin, stdout, stderr, wait_thr|
+          stdin.close # we don't pass any input to the process
+          output = stdout.gets
+          error = stderr.gets
+          exit_code = wait_thr.value
+        end
+
+        if exit_code != 0
+          Jekyll.logger.error("WebP:","command returned #{exit_code} with error #{error}")
+        end
+
+        # Return any captured return value
+        return [output, error]
+      end
+
       # Runs the WebP executable for the given input parameters
       # the function detects the OS platform and architecture automatically
       def self.run(input_file, output_file, flags, size)
@@ -26,33 +46,25 @@ module Jekyll
 
         Jekyll.logger.info("Webp:", "Generating #{output_file}")
         # Construct the full program call
-        cmd = "\"#{full_path}\" -quiet -mt #{flags} \"#{input_file}\" "
+        cmd = "convert #{flags} \"#{input_file}\" "
         if size != 0
-          if width > height
-            cmd += "-resize #{size.to_s} 0 "
-          else
-            cmd += "-resize 0 #{size.to_s} "
-          end
+          cmd += "-filter Lanczos -resize \"#{size.to_s}>\" "
         end
-        cmd += "-o \"#{output_file}\""
+        cmd += "\"#{output_file}\""
+        Jekyll.logger.info(cmd)
 
-        # Execute the command
-        exit_code = 0
-        error = ""
-        output = ""
-        Open3.popen3(cmd) do |stdin, stdout, stderr, wait_thr|
-          stdin.close # we don't pass any input to the process
-          output = stdout.gets
-          error = stderr.gets
-          exit_code = wait_thr.value
+        run_cmd(cmd)
+        extension = File.extname(output_file)
+        basename = File.basename(output_file, extension)
+        path = File.dirname(output_file)
+        new_output_file = path + "/" + basename + ".jpg"
+        cmd = "convert \"#{input_file}\" -quality 94% -define jpeg:dct-method=float -strip -interlace Plane "
+        if size != 0
+          cmd += "-filter Lanczos -resize \"#{size.to_s}>\" "
         end
-
-        if exit_code != 0
-          Jekyll.logger.error("WebP:","cwebp returned #{exit_code} with error #{error}")
-        end
-
-        # Return any captured return value
-        return [output, error]
+        cmd += "\"#{new_output_file}\""
+        Jekyll.logger.info(cmd)
+        run_cmd(cmd)
       end #function run
 
       # Returns the correct executable name depending on the OS platform and OS architecture

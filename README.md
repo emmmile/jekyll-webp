@@ -1,5 +1,11 @@
+# WebP Generator for Jekyll [DEPRECATED]
 
-# WebP Generator for Jekyll
+This gem is not supported anymore. If you want similar functionality **please use [jekyll-imagemagick](https://gitlab.com/emmmile/jekyll-imagemagick)**.
+
+If you just need plain webp conversion, without imagemagick resizing or filters go to the original version [jekyll-webp](https://github.com/sverrirs/jekyll-webp).
+
+---
+
 WebP Image Generator for Jekyll Sites can automatically generate WebP images for all images on your static site and serve them when possible.
 > Read more about this tool on my blog at <a href="https://blog.sverrirs.com/2016/06/webp-generator-for-jekyll-sites.html" target="_blank">blog.sverrirs.com</a>
 

@@ -1,5 +1,9 @@
 # coding: utf-8
+require 'date'
 require_relative 'lib/jekyll-webp-resize/version'
+
+warn "[DEPRECATION] This gem has been renamed to jekyll-imagemagick and will no longer be supported. " \
+     "Please switch to jekyll-imagemagick as soon as possible."
 
 Gem::Specification.new do |spec|
   spec.name          = "jekyll-webp-resize"
@@ -25,4 +29,9 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "minitest", '~> 5.4', '>= 5.4.3'
   spec.add_runtime_dependency "fastimage", '~> 2.1'
   # spec.add_runtime_dependency "rmagick", "~> 2.16"
+  spec.post_install_message = <<-MESSAGE
+    !    The jekyll-webp-resize gem has been deprecated and has been replaced by jekyll-imagemagik.
+    !    See: https://rubygems.org/gems/jekyll-imagemagick
+    !    And: https://gitlab.com/emmmile/jekyll-imagemagick
+    MESSAGE
 end
